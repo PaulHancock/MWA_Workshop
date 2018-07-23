@@ -105,49 +105,6 @@ uses tempaltes:
   - make a single time/freq image and clean
   - perform primary beam correction on this image.
 
-### obs_flag.sh
-Perform flagging on a measurement set.
-This consists of running `aoflagger` on the dataset (always), and if there is a supplied flag file it will be applied before running `aoflagger`
-
-
-Usage:
-```
-obs_flag.sh [-d dep] [-q queue] [-f flagfile] [-t] obsnum
-  -d dep      : job number for dependency (afterok)
-  -q queue    : job queue, default=gpuq
-  -f flagfile : file to use for flagging
-                default is processing/<obsnum>_tile_to_flag.txt
-  -t          : test. Don't submit job, just make the batch file
-                and then return the submission command
-  obsnum      : the obsid to process
-```
-
-uses tempaltes:
-- `flag.tmpl` (obsnum->OBSNUM)
-
-No job is submitted if the flagging file doesn't exist so this script is safe to include always.
-
-### obs_flag_tiles.sh
-Flags a single observation using the corresponding flag file.
-The flag file should contain a list of integers being the tile numbers (all on one line, space separated).
-This does *not* run `aoflagger`.
-
-
-usage: 
-```
-obs_flag_tiles.sh [-d dep] [-q queue] [-f flagfile] [-t] obsnum
-  -d dep      : job number for dependency (afterok)
-  -q queue    : job queue, default=gpuq
-  -f flagfile : file to use for flagging
-                default is processing/<obsnum>_tile_to_flag.txt
-  -t          : test. Don't submit job, just make the batch file
-                and then return the submission command
-  obsnum      : the obsid to process
-```
-
-uses templates:
-- `flag_tiles.tmpl` (obsnum->OBSNUM)
-
 ### obs_sfind.sh
 Run source finding on all the 2m, 28s, and 0.5s cadence stokes I, beam
 corrected images for a given observation. 
