@@ -5,16 +5,8 @@ base='/astro/mwasci/phancock/D0009/'
 
 usage()
 {
-echo "obs_asvo.sh [-d dep] [-c calid] [-n calname] [-s timeav] [-k freqav] [-t] obsnum
+echo "obs_asvo.sh [-d dep] [-s timeav] [-k freqav] [-t] obsnum
   -d dep     : job number for dependency (afterok)
-  -c calid   : obsid for calibrator. 
-               If a calibration solution exists for calid
-               then it will be applied this dataset.
-  -n calname : The name of the calibrator.
-               Implies that this is a calibrator observation 
-               and so calibration solutions will be calculated.
-  -m minbad  : The minimum number of bad dipoles requried for a 
-               tile to be used (not flagged), default = 2
   -s timeav  : time averaging in sec. default = no averaging
   -k freqav  : freq averaging in KHz. default = no averaging
   -t         : test. Don't submit job, just make the batch file
@@ -24,9 +16,6 @@ exit 1;
 }
 
 #initialize as empty
-calid=
-calname=
-minbad=2
 dep=
 tst=
 timeav=
@@ -38,12 +27,6 @@ do
     case "$OPTION" in
 	d)
 	    dep=${OPTARG} ;;
-	c)
-	    calid=${OPTARG}  ;;
-	n)
-	    calname=${OPTARG} ;;
-	m)
-	    minbad=${OPTARG} ;;
 	s)
 	    timeav=${OPTARG} ;;
 	k)
