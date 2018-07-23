@@ -1,0 +1,26 @@
+#! /bin/bash -l
+#SBATCH --export=NONE
+#SBATCH -M galaxy
+#SBATCH -p workq
+#SBATCH --account=ACCOUNT
+#SBATCH --time=06:00:00
+#SBATCH --nodes=1
+#SBATCH --out=BASEDIR/queue/logs/apply_cal_OBSNUM.o%A
+#SBATCH --error=BASEDIR/queue/logs/apply_cal_OBSNUM.e%A
+
+set -x
+
+# determine memory in GB
+mem=$( echo "$SLURM_MEM_PER_NODE / 1000" | bc )
+# determine number of cores (accounting for hyper-threading)
+cores=$( echo "$SLURM_TASKS_PER_NODE / 2" | bc )
+
+calfile=CALFILE
+base=BASEDIR
+datadir="${base}/processing"
+obsnum=OBSNUM
+
+
+# start calibration
+cd ${datadir}/${obsnum}
+applysolutions ${obsnum}.ms ${calfile}
