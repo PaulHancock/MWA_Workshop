@@ -1,0 +1,44 @@
+#! /bin/bash -l
+#SBATCH --export=NONE
+#SBATCH -M galaxy
+#SBATCH -p workq
+#SBATCH --account=ACCOUNT
+#SBATCH --time=10:00:00
+#SBATCH --nodes=1
+#SBATCH --out=BASEDIR/queue/logs/sfind_OBSNUM.o%A
+#SBATCH --error=BASEDIR/queue/logs/sfind_OBSNUM.e%A
+
+set -x
+
+# determine memory in GB
+mem=$( echo "$SLURM_MEM_PER_NODE / 1000" | bc )
+# determine number of cores (accounting for hyper-threading)
+cores=$( echo "$SLURM_TASKS_PER_NODE / 2" | bc )
+
+base=BASEDIR
+datadir=${base}/processing
+obsnum=OBSNUM
+
+cd ${datadir}/${obsnum}
+
+# files that need to be processed
+prefix="${obsnum}-"
+suffix="-pbcorr-I.fits"
+
+# find the BMAJ/BMIN/BPA from the lr (cleaned) image
+image2m="${prefix}2m${suffix}"
+stats=( `gethead ${image2m} BMAJ BMIN BPA` )
+bmaj=${stats[0]}
+bmin=${stats[1]}
+bpa=${stats[2]}
+
+# process the 2m image
+if [[ ! -e ${image2m%%.fits}_bkg.fits} ]]
+then
+    BANE ${1} --compress
+fi
+
+if [[ ! -e ${image2m%%.fits}_comp.fits} ]]
+then
+    aegean --autoload ${1} --table=${1} --island --negative
+fi
