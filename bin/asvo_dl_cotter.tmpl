@@ -1,0 +1,46 @@
+#! /bin/bash -l
+#SBATCH --export=NONE
+#SBATCH -M zeus
+#SBATCH -p copyq
+#SBATCH --account=ACCOUNT
+#SBATCH --time=12:00:00
+#SBATCH --nodes=1
+#SBATCH --out=BASEDIR/queue/logs/asvo_OBSNUM.o%A
+#SBATCH --error=BASEDIR/queue/logs/asvo_OBSNUM.e%A
+set -x
+
+base=BASEDIR
+datadir=${base}/processing
+
+obsnum=OBSNUM
+tres=TRES
+fres=FRES
+csvfile="${obsnum}_dl.csv"
+
+
+# start task
+cd ${base}
+
+mkdir -p ${datadir}/${obsnum}
+
+cd ${datadir}/${obsnum}
+
+# encode the conversion options into a csv file
+echo "obs_id=${obsnum}, job_type=c, timeres=${tres}, freqres=${fres}, edgewidth=80, conversion=ms, allowmissing=true, flagdcchannels=true, usepcentre=true" > ${csvfile}
+
+outfile="${obsnum}_ms.zip"
+
+# Don't download files if they already exist
+if [[ -e "${outfile}" ]]
+then
+    echo "${outfile} exists, not downloading again"
+else
+    mwa_client --csv=${csvfile} --dir=${datadir}/${obsnum}
+fi
+
+# unzip the file and then remove it
+unzip ${outfile}
+rm ${outfile}
+
+cd ${base}
+
