@@ -105,27 +105,6 @@ uses tempaltes:
   - make a single time/freq image and clean
   - perform primary beam correction on this image.
 
-### obs_im05s.sh
-Usage: `obs_im05s.sh obsnum [depend]`
-- obsnum: MWA observation id
-- depend: slurm job id on which this task depends (afterok)
-
-uses tempaltes:
-- `im05s.tmpl` (obsnum->OBSNUM)
-  - make one image per 0.5sec time interval with no cleaning
-  - perform primary beam correction on these images
-
-
-### obs_im28s.sh
-Usage: `obs_im28s.sh obsnum [depend]`
-- obsnum: MWA observation id
-- depend: slurm job id on which this task depends (afterok)
-
-uses tempaltes:
-- `im28s.tmpl` (obsnum->OBSNUM)
-  - make one image per 28sec time interval and clean
-  - perform primary beam correction on these images
-
 ### obs_flag.sh
 Perform flagging on a measurement set.
 This consists of running `aoflagger` on the dataset (always), and if there is a supplied flag file it will be applied before running `aoflagger`
