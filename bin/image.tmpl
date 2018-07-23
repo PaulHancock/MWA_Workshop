@@ -1,0 +1,75 @@
+#! /bin/bash -l
+#SBATCH --export=NONE
+#SBATCH -M galaxy
+#SBATCH -p workq
+#SBATCH --account=ACCOUNT
+#SBATCH --time=8:00:00
+#SBATCH --nodes=1
+#SBATCH --nodes=1
+#SBATCH --out=BASEDIR/queue/logs/image_OBSNUM.o%A
+#SBATCH --error=BASEDIR/queue/logs/image_OBSNUM.e%A
+
+set -x
+
+# determine memory in GB
+mem=$( echo "$SLURM_MEM_PER_NODE / 1000" | bc )
+# determine number of cores (accounting for hyper-threading)
+cores=$( echo "$SLURM_TASKS_PER_NODE / 2" | bc )
+
+
+obsnum=OBSNUM
+base=BASEDIR
+imsize=IMSIZE
+pixscale=SCALE
+clean=CLEAN
+
+datadir=${base}/processing
+
+cd ${datadir}
+
+# set the image size
+if [[ ! -z ${imsize} ]]
+then 
+    imsize="-size ${imsize} ${imsize}"
+else
+    imsize="-size 4096 4096"
+fi
+
+# set the image scale
+if [[ ! -z ${pixscale} ]]
+then
+    pixscale="-scale ${pixscale}"
+else
+    pixscale="-scale 32asec"
+fi
+
+#if clean is set then change it to the default clean options.
+if [[ ! -z ${clean} ]]
+then 
+    clean="-joinpolarizations -niter 20000 -threshold 0.2"
+fi
+
+# start
+# cd ${datadir}/${obsnum}
+
+imfile="${obsnum}-lr-pbcorr-I-image.fits"
+if [[ ! -e ${imfile} ]]
+then
+  wsclean -name ${obsnum}-2m ${imsize} \
+      -abs-mem ${mem} \
+      -weight briggs -1 -mfsweighting ${pixscale} \
+      -pol xx,yy -minuv-l 30 \
+      ${clean} ${obsnum}.ms
+
+  # make primary beam models iff they don't already exist
+  beams=$( ls beam-MFS-*.fits | wc -l )
+  if [[ ${beams} -ne 8 ]]
+  then
+      beam -2016 -proto ${obsnum}-2m-XX-image.fits -ms ${obsnum}.ms -name beam-MFS
+  fi
+  
+  # create stokes iquv images
+  pbcorrect ${obsnum}-2m image.fits beam-MFS ${obsnum}-2m-pbcorr
+else
+  echo "${imfile} exists, skipping"
+fi
